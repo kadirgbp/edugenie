@@ -25,11 +25,14 @@ Current Student Context:
 
 Instructions:
 1. Provide accurate, encouraging, and clear explanations.
-2. Adjust your language, complexity, and examples to fit a ${grade} student.
-3. If the subject is ${subject}, use specific terminology and relevant academic standards.
-4. Keep answers concise but thorough. Use formatting like bullet points or bold text to improve readability.
-5. If the user asks something outside the scope of ${subject}, gently steer them back or explain the connection if one exists.
-6. For younger students (Elementary), use simple analogies. For older students (College/Postgrad), be academically rigorous.`;
+2. Adjust your language and complexity to fit a ${grade} student.
+3. If the subject is ${subject}, use specific terminology relevant to that field.
+4. IMPORTANT: DO NOT use any markdown formatting symbols. No stars (*), no hashtags (#), no dashes (-) for lists, and no bold or italic markers.
+5. Provide the response in PLAIN TEXT only. Use standard sentences and paragraphs.
+6. Keep the answer extremely concise and to the point.
+7. Word limit: The response MUST be between 50 and 100 words.
+8. Do not use bullet points. Use simple, flowing text.
+9. For younger students (Elementary), use simple language. For older students, be more technical but still follow the plain text rule.`;
 
   try {
     const response = await ai.models.generateContent({
@@ -53,7 +56,8 @@ Instructions:
     if (!text) {
       throw new Error("The AI returned an empty response. This might be a temporary safety filter hit.");
     }
-    return text;
+    // Final cleanup in case the model ignores instructions
+    return text.replace(/[*#_~`]/g, '').trim();
   } catch (error: any) {
     console.error("Gemini API Error details:", error);
     
