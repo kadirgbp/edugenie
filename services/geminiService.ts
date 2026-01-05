@@ -8,7 +8,14 @@ export const askEduGenie = async (
   question: string,
   history: { role: 'user' | 'assistant', content: string }[]
 ) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  // The API key is injected by Vite's define config during build
+  const apiKey = process.env.API_KEY;
+  
+  if (!apiKey) {
+    throw new Error("API Key is missing. Please configure your environment variables.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
   
   const systemInstruction = `You are EduGenie, a world-class educational AI tutor.
 Current Student Context:
@@ -41,9 +48,13 @@ Instructions:
       },
     });
 
-    return response.text || "I'm sorry, I couldn't generate an answer right now.";
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw new Error("Failed to communicate with the educational AI. Please try again.");
+    const text = response.text;
+    if (!text) {
+      throw new Error("Empty response from AI");
+    }
+    return text;
+  } catch (error: any) {
+    console.error("Gemini API Error details:", error);
+    throw new Error(error.message || "Failed to communicate with the educational AI.");
   }
 };
