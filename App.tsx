@@ -46,12 +46,16 @@ const App: React.FC = () => {
   }, [grade, subject, messages]);
 
   const handleClearChat = () => {
+    setGrade(null);
+    setSubject(null);
     setMessages([]);
     setError(null);
   };
 
+  const isConfigured = grade && subject;
+
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-12 bg-slate-50/50">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -73,21 +77,26 @@ const App: React.FC = () => {
       </nav>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        {/* Header Info */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-extrabold text-slate-900 mb-2">
-            Ready to learn something new?
-          </h2>
-          <p className="text-slate-500 max-w-2xl leading-relaxed">
-            Personalize your AI tutor by choosing your grade and subject. EduGenie adapts its explanations to match your academic level perfectly.
-          </p>
-        </div>
+        {/* Only show welcome header when not configured */}
+        {!isConfigured && (
+          <div className="mb-8 animate-in fade-in duration-700">
+            <h2 className="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">
+              Ready to learn something new?
+            </h2>
+            <p className="text-lg text-slate-500 max-w-2xl leading-relaxed">
+              Personalize your AI tutor by choosing your grade and subject. EduGenie adapts its explanations to match your academic level perfectly.
+            </p>
+          </div>
+        )}
 
-        {/* Configuration Panel */}
+        {/* Configuration Wizard */}
         <SelectionPanel 
           currentGrade={grade} 
           currentSubject={subject} 
-          onGradeChange={setGrade} 
+          onGradeChange={(g) => {
+            setGrade(g);
+            if (!g) setSubject(null);
+          }} 
           onSubjectChange={setSubject} 
         />
 
@@ -99,55 +108,40 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Active Session Info */}
-        {(grade || subject) && (
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Context:</span>
-            <div className="flex gap-2">
-              {grade && (
-                <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded uppercase">
-                  {grade}
-                </span>
-              )}
-              {subject && (
-                <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded uppercase">
-                  {subject}
-                </span>
-              )}
+        {/* Chat Component - Only visible when fully configured */}
+        {isConfigured && (
+          <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200">
+            <ChatInterface 
+              messages={messages}
+              isLoading={isLoading}
+              onSendMessage={handleSendMessage}
+              grade={grade}
+              subject={subject}
+            />
+
+            {/* Educational Footer Tips - Only show when chatting */}
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 animate-in fade-in duration-1000 delay-500">
+              <div className="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100">
+                <h4 className="font-bold text-indigo-900 text-sm mb-2">Be Specific</h4>
+                <p className="text-xs text-indigo-700/80 leading-relaxed">
+                  Instead of "Help with math", try "Explain how to solve quadratic equations using the formula."
+                </p>
+              </div>
+              <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100">
+                <h4 className="font-bold text-emerald-900 text-sm mb-2">Ask Why</h4>
+                <p className="text-xs text-emerald-700/80 leading-relaxed">
+                  EduGenie is great at reasoning. Ask for the "logic" or "historical context" behind a concept.
+                </p>
+              </div>
+              <div className="bg-amber-50/50 p-5 rounded-2xl border border-amber-100">
+                <h4 className="font-bold text-amber-900 text-sm mb-2">Test Yourself</h4>
+                <p className="text-xs text-amber-700/80 leading-relaxed">
+                  Ask "Can you quiz me on the key events of the Industrial Revolution?" to practice active recall.
+                </p>
+              </div>
             </div>
           </div>
         )}
-
-        {/* Chat Component */}
-        <ChatInterface 
-          messages={messages}
-          isLoading={isLoading}
-          onSendMessage={handleSendMessage}
-          grade={grade}
-          subject={subject}
-        />
-
-        {/* Educational Footer Tips */}
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100">
-            <h4 className="font-bold text-indigo-900 text-sm mb-2">Be Specific</h4>
-            <p className="text-xs text-indigo-700/80 leading-relaxed">
-              Instead of "Help with math", try "Explain how to solve quadratic equations using the formula."
-            </p>
-          </div>
-          <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100">
-            <h4 className="font-bold text-emerald-900 text-sm mb-2">Ask Why</h4>
-            <p className="text-xs text-emerald-700/80 leading-relaxed">
-              EduGenie is great at reasoning. Ask for the "logic" or "historical context" behind a concept.
-            </p>
-          </div>
-          <div className="bg-amber-50/50 p-5 rounded-2xl border border-amber-100">
-            <h4 className="font-bold text-amber-900 text-sm mb-2">Test Yourself</h4>
-            <p className="text-xs text-amber-700/80 leading-relaxed">
-              Ask "Can you quiz me on the key events of the Industrial Revolution?" to practice active recall.
-            </p>
-          </div>
-        </div>
       </main>
     </div>
   );
